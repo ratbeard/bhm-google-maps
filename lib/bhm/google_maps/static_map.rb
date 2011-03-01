@@ -43,13 +43,21 @@ module BHM
       def group_locations_by_style(locations)
         locations.each_with_object({}) do |location, store|
           styles = []
-          styles << "color:#{color}"           if color = location.color
-          styles << "size:#{size}"             if size = location.size
-          styles << "icon:#{encode_url(icon)}" if icon = location.icon
-          styles << "label:#{label}"           if label = location.label
+          if color = location.color
+            styles << "color:#{color}"           
+          end
+          if size = location.size
+            styles << "size:#{size}"             
+          end
+          if icon = location.icon
+            styles << "icon:#{encode_url(icon)}"
+          end
+          if label = location.label
+            styles << "label:#{label}"           
+          end
 
           key = styles.join('|') 
-          val = "|#{loc.lat},#{loc.lng}"
+          val = "|#{location.lat},#{location.lng}"
           (store[key] ||= "") << val
         end
       end

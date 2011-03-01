@@ -11,7 +11,7 @@ module BHM
           instance_variable_set :"@#{k}", v
         end
       end
-      attr_reader :lat, :lng, :address, :color, :size, :icon
+      attr_reader :lat, :lng, :address, :color, :size, :icon, :label
 
       # Convert an object to a Location
       # An object should implement a method `to_gmap_data` that returns a hash of 
@@ -62,20 +62,28 @@ module BHM
       end
       
       def build_container(image)
+        extra = ""
         if selector = @options.delete(:location_data_selector)
           # Lat/Lng data is embedded elsewhere in the page
           container_html_options[:'data-locations-selector'] = selector
+        elsif @options.delete(:embed_as_json)
+          extra = embed_locations_as_json
         elsif @addresses.length == 1
           embed_location_data_for_location
         else
           embed_location_data_for_locations
         end
-
         #Pass along users html options
         #container_html_options.reverse_merge!(@options)
-        @template.content_tag(:div, image, @container_html_options)
+        container = @template.content_tag(:div, image + extra, @container_html_options)
       end
     
+      # Embed locations as json in a global variable
+      def embed_locations_as_json(name="GMAP_DATA")
+        @template.javascript_tag "window.#{name} = #{@addresses.to_json};"
+      end
+
+      # embed information for a single location on map container
       def embed_location_data_for_location
         lat, lng = @addresses.first.lat, @addresses.first.lng
         @container_html_options.merge! 'data-latitude' => lat, 'data-longitude' => lng
@@ -85,6 +93,7 @@ module BHM
         end                                    
       end
 
+      # embed information for a single location on map container
       def embed_location_data_for_locations
         latitudes, longitudes = [], []
         @addresses.each do |address|
