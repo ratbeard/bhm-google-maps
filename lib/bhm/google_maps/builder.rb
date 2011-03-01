@@ -6,18 +6,33 @@ module BHM
     DEFAULT_SIZE = "#{DEFAULT_WIDTH}x#{DEFAULT_HEIGHT}"
 
     class Location
-      def initialize(object)
-        @lat, @lng = BHM::GoogleMaps.address_to_lat_lng_proc.call(object)
-        @address = BHM::GoogleMaps.address_to_s_proc.call(@address) 
+      def initialize(attributes)
+        attributes.each do |k, v|
+          instance_variable_set :"@#{k}", v
+        end
       end
-      attr_reader :lat, :lng, :address
+      attr_reader :lat, :lng, :address, :color, :size, :icon
+
+      # Convert an object to a Location
+      # An object should implement a method `to_gmap_data` that returns a hash of 
+      # location and style data.
+      #
+      # For simple cases where custom styles aren't needed, a class just needs to 
+      # implement `lat` and `lng` methods.
+      def self.from(location)
+        if location.respond_to? :to_gmap_data
+          new(location.to_gmap_data) 
+        else
+          new({:lat => location.lat, :lng => location.lng })
+        end
+      end
     end
 
 
     class Builder
       def initialize(template, addresses, options)
         @template = template
-        @addresses  = Array.wrap(addresses).map {|l| Location.new(l) }
+        @addresses  = Array.wrap(addresses).map {|l| Location.from(l) }
         @options  = options.symbolize_keys
         @marker_options = @options.delete(:marker) || {}
         @static = @options.delete(:static)
