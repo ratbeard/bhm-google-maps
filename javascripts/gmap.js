@@ -47,9 +47,11 @@
       });
     };
     map.locationDataForMap = function($e) {
-      var loc, locations, longitude, selector, _i, _len;
+      var data, loc, locations, longitude, selector, _i, _len;
       longitude = getData($e, 'longitude');
-      if (selector = getData($e, 'locations-selector')) {
+      if (data = window.GMAP_DATA) {
+        locations = data;
+      } else if (selector = getData($e, 'locations-selector')) {
         locations = map.locationsDataFromElements(selector);
       } else if (longitude.indexOf(',') > -1) {
         locations = map.locationsDataFromDataAttributes($e);
@@ -98,8 +100,8 @@
       return $(selector).map(function() {
         var result;
         return result = {
-          lat: +$('.latitude', this).text(),
-          lng: +$('.longitude', this).text(),
+          lat: $('.latitude', this).text(),
+          lng: $('.longitude', this).text(),
           title: $('.marker-title', this).text()
         };
       });
@@ -157,7 +159,8 @@
       return new google.maps.Marker({
         map: _map,
         position: location.point,
-        title: location.title
+        title: location.title,
+        icon: location.icon
       });
     };
     $(document).ready(map.install);

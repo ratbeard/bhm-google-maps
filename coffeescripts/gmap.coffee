@@ -62,7 +62,9 @@
   # Set `data-longitude` and `data-latitude` on the map directly element
   map.locationDataForMap = ($e) ->
     longitude = getData($e, 'longitude')
-    if selector = getData($e, 'locations-selector')
+    if data = window.GMAP_DATA
+      locations = data
+    else if selector = getData($e, 'locations-selector')
       locations = map.locationsDataFromElements(selector)
     else if longitude.indexOf(',') > -1 # multiple locations
       locations = map.locationsDataFromDataAttributes($e)
@@ -104,8 +106,8 @@
   map.locationsDataFromElements = (selector) -> 
     $(selector).map ->
       result =
-        lat: +$('.latitude', this).text()
-        lng: +$('.longitude', this).text()
+        lat: $('.latitude', this).text()
+        lng: $('.longitude', this).text()
         title: $('.marker-title', this).text()
 
   # Called with a single html dom element as an argument, will
@@ -156,6 +158,7 @@
       map:      _map
       position: location.point
       title:    location.title
+      icon:     location.icon
 
   # On load, we'll install the maps.
   $(document).ready map.install
